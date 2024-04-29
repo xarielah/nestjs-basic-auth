@@ -1,12 +1,24 @@
 import { Module } from '@nestjs/common';
-import { DatabaseService } from 'src/db/db.service';
+import { JwtModule } from '@nestjs/jwt';
+import { SessionService } from 'src/db/session.service';
+import { UserService } from 'src/db/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BcryptService } from './strategy/bcrypt.service';
-import { JwtService } from './strategy/jwt.service';
+import { TokenModule } from './strategy/token.module';
 
 @Module({
   controllers: [AuthController],
-  providers: [DatabaseService, AuthService, BcryptService, JwtService],
+  imports: [
+    TokenModule,
+    JwtModule.register({ secret: process.env.JWT_SECRET || '', global: true }),
+  ],
+  providers: [
+    UserService,
+    AuthService,
+    BcryptService,
+    SessionService,
+    UserService,
+  ],
 })
 export class AuthModule {}

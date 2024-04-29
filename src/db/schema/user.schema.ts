@@ -22,6 +22,4 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
-const User = models.User || model('User', userSchema);
-User.createIndexes({ collation: { locale: 'en', strength: 2 } });
-export { User };
+export const User = models.User || model('User', userSchema);
