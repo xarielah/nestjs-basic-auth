@@ -45,9 +45,22 @@ For successful operations, the http status will be ```201 Created```, if user ex
 
 Expected body of:
 ```
-username: string between x and y.
-password: string between x and y.
+username: string.
+password: string.
 ```
 
-For successful operations, the http status will be ```201 Created```, if user exists, or bad input inserted the response will be ```400 Bad Request```, for any other issue, expected status code will be ```Internal Server Error 500```.
+For successful operations, the http status will be ```200 OK```, if user credentials are bad, or bad input inserted the response will be ```400 Bad Request```, for any other issue, expected status code will be ```Internal Server Error 500```.
+
+#### Logout
+
+> DELETE Endpoint: /auth/logout
+
+For successful operation, response expected is ```200 OK```, no bad request for this one, only ```Internal Server Error 500``` if some server-side or database issue occured.
+
+#### Refresh
+
+> POST Endpoint: /auth/refresh
+
+For successful operations, the http status will be ```200 OK```, if user token is bad ```401 Unauthorized``` will be returned with a new http-cookie set for the access token. For any other issue, expected status code will be ```Internal Server Error 500```.
+
 > For any improvements suggestions please open an issue!
