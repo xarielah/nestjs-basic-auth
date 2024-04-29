@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { SessionService } from 'src/db/session.service';
 import { UserService } from 'src/db/user.service';
+import { TokenService } from '../token/token.service';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { BcryptService } from './strategy/bcrypt.service';
-import { TokenService } from './strategy/token.service';
 import { LoggedUserPayload } from './types/auth.types';
 
 @Injectable()
@@ -65,7 +65,9 @@ export class AuthService {
    * @param {string} refreshToken
    * @returns any
    */
-  public async refreshUser(refreshToken: string): Promise<LoggedUserPayload> {
+  public async refreshUser(
+    refreshToken: string,
+  ): Promise<Pick<LoggedUserPayload, 'accessToken'>> {
     const payload = await this.tokenService.decodeToken(refreshToken);
     if (!payload) throw new UnauthorizedException();
 
@@ -83,7 +85,6 @@ export class AuthService {
 
     return {
       accessToken: accessToken,
-      refreshToken: session.refreshToken,
     };
   }
 }

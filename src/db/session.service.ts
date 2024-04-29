@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { TokenService } from 'src/auth/strategy/token.service';
-import { TokenPayload } from 'src/auth/strategy/token.types';
 import { LoggedUserPayload } from 'src/auth/types/auth.types';
+import { TokenService } from 'src/token/token.service';
+import { TokenPayload } from 'src/token/token.types';
 import { Session } from './schema/session.schema';
 
 @Injectable()

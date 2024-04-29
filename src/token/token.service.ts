@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoggedUserPayload } from '../types/auth.types';
+import { LoggedUserPayload } from '../auth/types/auth.types';
 import { TokenPayload } from './token.types';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class TokenService {
    * @returns token
    */
   public async createAccessToken(payload: TokenPayload): Promise<string> {
-    return this.sign(payload, '1d');
+    return this.sign(payload, '1s');
   }
 
   public async decodeToken(token: string): Promise<TokenPayload> {
@@ -72,19 +72,15 @@ export class TokenService {
 
   private async sign(payload: TokenPayload, exp: string): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET || '',
       expiresIn: exp,
     });
   }
 
   public async verify(token: string): Promise<boolean> {
     try {
-      await this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET || '',
-      });
+      await this.jwtService.verify(token);
       return true;
     } catch (error) {
-      console.log('🚀 ~ TokenService ~ verify ~ error:', error);
       return false;
     }
   }
