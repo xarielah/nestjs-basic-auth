@@ -1,6 +1,8 @@
-# nestjs-basic-auth
+<h1 align="center">Basic Authentication & JWT Authorization</h1>
 
-This project is to example how basic autentication and a simple role-less authorization works using the enterprise-graded backend framework, Nest.js.
+An orthodox "Basic Authentication" modern example using the enterprise-graded backend framework, Nest.js.
+Basic authentication is a method of authinticating with a service, using a username and a password.
+Throughout the application resources, the application uses JWT tokens to authorize or deny users' access appropriately.
 
 ## Tech Stack
 
@@ -101,7 +103,7 @@ A verification token is issued for new users registered. The verification mechan
 6. user record on db updated to verified = true.
 7. a newly access token is issued, with "verified" flag set to true.
 
-> GET Endpoint: /auth/verify?token=<token here>
+> GET Endpoint: /auth/verify?token=TOKEN_IS_HERE
 
 A ```200 OK``` will be sent on a successful verification, ```401 Unauthorized``` on a user who is verifying not them-selves. ```400 Bad Request``` on a missing token / invalid token requests, any other error will issue ```500 Internal Server Error```.
 
