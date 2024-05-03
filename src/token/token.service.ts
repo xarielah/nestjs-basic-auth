@@ -13,7 +13,7 @@ export class TokenService {
    * @returns token
    */
   public async createAccessToken(payload: TokenPayload): Promise<string> {
-    return this.sign(payload, '1s');
+    return this.sign(payload, '600s');
   }
 
   public async decodeToken(token: string): Promise<TokenPayload> {
@@ -70,7 +70,13 @@ export class TokenService {
     };
   }
 
-  private async sign(payload: TokenPayload, exp: string): Promise<string> {
+  /**
+   * Gets a payload and a expiration time and return a signed JWT.
+   * @param {TokenPayload} payload
+   * @param {string} exp
+   * @returns token
+   */
+  public async sign(payload: TokenPayload, exp: string): Promise<string> {
     return this.jwtService.signAsync(payload, {
       expiresIn: exp,
     });

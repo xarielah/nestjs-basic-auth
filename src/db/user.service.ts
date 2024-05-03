@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
 import { BcryptService } from 'src/auth/strategy/bcrypt.service';
+import { TokenPayload } from 'src/token/token.types';
 import { User } from './schema/user.schema';
 
 @Injectable()
@@ -29,24 +30,43 @@ export class UserService {
   }
 
   /**
+   * Gets a user id and return if verification successful or not.
+   * @param {string} userId
+   * @return boolean
+   */
+  public async verifyUser(userId: string): Promise<boolean> {
+    try {
+      await User.findByIdAndUpdate(userId, { verified: true });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Gets a username, password and email object, and creates a new user.
    * @param {RegisterUserDto} user
    * @returns boolean
    */
-  public async create(user: RegisterUserDto): Promise<boolean> {
+  public async create(user: RegisterUserDto): Promise<TokenPayload> {
     try {
       const foundUser = await this.get(user);
-      if (foundUser) return false;
+      if (foundUser) return null;
       const newUser = new User({
         username: user.username,
         email: user.email,
         password: await this.bcryptService.hash(user.password),
       });
-      await newUser.save();
-      return true;
+      const createdUser = await newUser.save({ new: true });
+      return {
+        id: createdUser._id,
+        username: createdUser.username,
+        email: createdUser.email,
+        verified: false,
+      };
     } catch (error) {
       console.log(error);
-      return false;
+      return null;
     }
   }
 }

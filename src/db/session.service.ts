@@ -94,4 +94,22 @@ export class SessionService {
       return false;
     }
   }
+
+  /**
+   * Gets a user id and a token, and updates the session with the new token.
+   * @param {string} userId
+   * @param {string} token
+   * @returns boolean
+   */
+  public async updateToken(userId: string, token: string): Promise<boolean> {
+    try {
+      const session = await this.get(userId);
+      if (!session) return false;
+      session.accessToken = token;
+      await session.save();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
