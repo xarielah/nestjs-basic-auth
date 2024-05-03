@@ -2,9 +2,11 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -42,7 +44,13 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   public async register(@Body() user: RegisterUserDto) {
-    return await this.authService.registerUser(user);
+    const verificationToken = await this.authService.registerUser(user);
+    return {
+      message:
+        'On real-world application, verification email would be sent instead of this',
+      verificationToken:
+        'http://localhost:3000/auth/verify?token=' + verificationToken,
+    };
   }
 
   @UseGuards(MustBeLogged)
@@ -78,5 +86,27 @@ export class AuthController {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  @UseGuards(MustBeLogged)
+  @Get('verify')
+  public async verify(
+    @Query('token') token: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const accessToken = req.cookies['accessToken'];
+    // In order to reduce db calls, since 'verified' is mounted and decoded on the jwt token,
+    // we could just re-decode the token with 'true' value and return a new http cookie to the client.
+    const newAccessToken = await this.authService.verifyUser(
+      accessToken,
+      token,
+    );
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
+    return res.json({ message: 'User verified', accessToken: newAccessToken });
   }
 }

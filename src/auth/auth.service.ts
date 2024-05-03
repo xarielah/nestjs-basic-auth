@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SessionService } from 'src/db/session.service';
 import { UserService } from 'src/db/user.service';
+import { VerificationTokenService } from 'src/db/verification-token.service';
 import { TokenService } from '../token/token.service';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -18,6 +21,7 @@ export class AuthService {
     private readonly bcryptService: BcryptService,
     private readonly sessionService: SessionService,
     private readonly tokenService: TokenService,
+    private readonly verificationService: VerificationTokenService,
   ) {}
 
   /**
@@ -27,8 +31,10 @@ export class AuthService {
    */
   public async registerUser(user: RegisterUserDto) {
     // If user creation has succeeded, we return a success message.
-    if (await this.userService.create(user))
-      return { message: 'User created successfully' };
+    const tokenPayload = await this.userService.create(user);
+    if (tokenPayload) {
+      return this.verificationService.createVerificationToken(tokenPayload);
+    }
 
     // Incase we didn't create the user, we throw an error.
     throw new BadRequestException();
@@ -53,6 +59,7 @@ export class AuthService {
       username: dbUser.username,
       email: dbUser.email,
       id: dbUser._id,
+      verified: dbUser.verified,
     });
     return {
       accessToken: tokens.accessToken,
@@ -78,6 +85,7 @@ export class AuthService {
       username: session.username,
       email: session.email,
       id: session.userId,
+      verified: session.verified,
     });
 
     session.accessToken = accessToken;
@@ -86,5 +94,38 @@ export class AuthService {
     return {
       accessToken: accessToken,
     };
+  }
+
+  /**
+   * Gets a token and verifies the user.
+   * @param {string} token
+   */
+  public async verifyUser(accessToken: string, token: string): Promise<string> {
+    if (!token) throw new BadRequestException();
+    try {
+      const payload = await this.tokenService.decodeToken(accessToken);
+      const isVerifiedAndDeleted =
+        await this.verificationService.verifyAndDeleteVerificationToken(
+          payload.id,
+          token,
+        );
+      if (!isVerifiedAndDeleted) throw new ForbiddenException();
+      const newAccessToken = await this.tokenService.createAccessToken({
+        username: payload.username,
+        email: payload.email,
+        id: payload.id,
+        verified: true,
+      });
+      await this.userService.verifyUser(token);
+      await this.sessionService.updateToken(payload.id, newAccessToken);
+
+      return newAccessToken;
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw new ForbiddenException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
   }
 }
