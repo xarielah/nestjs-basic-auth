@@ -67,30 +67,6 @@ email: string formatted as <email prefix>@<email host>
 
 For successful operations, the http status will be ```201 Created```, if user exists, or bad input inserted the response will be ```400 Bad Request```, for any other issue, expected status code will be ```Internal Server Error 500```.
 
-### Login
-
-> POST Endpoint: /auth/login
-
-Expected body of:
-```
-username: string.
-password: string.
-```
-
-For successful operations, the http status will be ```200 OK```, if user credentials are bad, or bad input inserted the response will be ```400 Bad Request```, for any other issue, expected status code will be ```Internal Server Error 500```.
-
-### Logout
-
-> DELETE Endpoint: /auth/logout
-
-For successful operation, response expected is ```204 NO CONTENT```, all related http cookies with tokens shall be expired and therefore deleted and also the session related to the user is deleted. No bad request for this one, only ```Internal Server Error 500``` if some server-side or database issue occured.
-
-### Refresh
-
-> POST Endpoint: /auth/refresh
-
-For successful operations, the http status will be ```201 Created```, if user token is bad ```401 Unauthorized``` will be returned with a new http-cookie set for the access token. For a user that isn't authorized a ```403 Forbidden``` will be returned. Any other errors thrown, expected status code will be ```Internal Server Error 500```.
-
 ### Verify
 
 A verification token is issued for new users registered. The verification mechanism works as followed:
@@ -106,5 +82,29 @@ A verification token is issued for new users registered. The verification mechan
 > GET Endpoint: /auth/verify?token=TOKEN_IS_HERE
 
 A ```200 OK``` will be sent on a successful verification, ```401 Unauthorized``` on a user who is verifying not them-selves. ```400 Bad Request``` on a missing token / invalid token requests, any other error will issue ```500 Internal Server Error```.
+
+### Logout
+
+> DELETE Endpoint: /auth/logout
+
+For successful operation, response expected is ```204 NO CONTENT```, all related http cookies with tokens shall be expired and therefore deleted and also the session related to the user is deleted. No bad request for this one, only ```Internal Server Error 500``` if some server-side or database issue occured.
+
+### Login
+
+> POST Endpoint: /auth/login
+
+Expected body of:
+```
+username: string.
+password: string.
+```
+
+For successful operations, the http status will be ```200 OK```, if user credentials are bad, or bad input inserted the response will be ```400 Bad Request```, for any other issue, expected status code will be ```Internal Server Error 500```.
+
+### Refresh
+
+> POST Endpoint: /auth/refresh
+
+For successful operations, the http status will be ```201 Created```, if user token is bad ```401 Unauthorized``` will be returned with a new http-cookie set for the access token. For a user that isn't authorized a ```403 Forbidden``` will be returned. Any other errors thrown, expected status code will be ```Internal Server Error 500```.
 
 > For any improvements suggestions please open an issue!
